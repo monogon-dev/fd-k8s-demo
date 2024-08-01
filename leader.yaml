@@ -9,22 +9,14 @@ data:
     dynamic_port_range = "8100-8200"
     scratch_directory = "/scratch/fd1"
     
-    [layout]
-    affinity = "4-20"
-    solana_labs_affinity = "20-30"
-    verify_tile_count = 1
-    bank_tile_count = 1
-    quic_tile_count = 1
-    
     [development.genesis]
     hashes_per_tick = 12500
     fund_initial_accounts = 9000
     
-    [development.bench]
-    larger_max_cost_per_block = true
-    larger_shred_limits_per_block = true
-    
     [rpc]
+    port = 8899
+    full_api = true
+    private = false
     transaction_history = false
     extended_tx_metadata_storage = false
     

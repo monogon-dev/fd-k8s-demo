@@ -8,18 +8,23 @@ if ! grep -Fq /sys/fs/bpf /proc/mounts; then
 fi
 
 # Copy over stuff from leader
-mkdir -p /scratch/leader
-while ! curl -o /scratch/leader/faucet.json http://leader:10801/fd1/faucet.json; do
+mkdir -p /scratch/cluster
+while ! curl -o /scratch/cluster/faucet.json http://leader:10801/fd1/faucet.json; do
   echo "Failed to download faucet.json, retrying..."
   sleep 1
 done
 
 # Fund identity
-solana-keygen new --no-bip39-passphrase -o /scratch/id.json
+if ! [[ -f /scratch/cluster/id.json ]]; then
+  echo "Creating identity..."
+  solana-keygen new --no-bip39-passphrase -o /scratch/cluster/id.json
+fi
+
+chown -R 1000:1000 /scratch/cluster
 
 echo "Funding identity..."
-solana -u http://leader:8899 transfer -k /scratch/leader/faucet.json \
-  --allow-unfunded-recipient /scratch/id.json 10
+solana -u http://leader:8899 transfer -k /scratch/cluster/faucet.json \
+  --allow-unfunded-recipient /scratch/cluster/id.json 10
 
 # Initialize Firedancer.
 fddev configure init all --config /etc/follower.toml

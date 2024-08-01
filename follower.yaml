@@ -14,24 +14,15 @@ data:
         "leader:8001"
     ]
     
-    [layout]
-    affinity = "10-20"
-    solana_labs_affinity = "20-30"
-    verify_tile_count = 1
-    bank_tile_count = 1
-    shred_tile_count = 1
-    
     [rpc]
+    port = 8899
+    full_api = true
+    private = false
     transaction_history = false
     extended_tx_metadata_storage = false
     
     [consensus]
-    identity_path = "/scratch/id.json"
-    
-    [development.bench]
-    larger_max_cost_per_block = true
-    larger_shred_limits_per_block = true
-    rocksdb_disable_wal = true
+    identity_path = "/scratch/cluster/id.json"
     
     [tiles.net]
     interface = "bond0"
