@@ -2,8 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: node-debugger-0
-  namespace: fd-dev-leopold
+  name: node-fd-debug-0
 spec:
   containers:
     - image: europe-west3-docker.pkg.dev/monogon-infra/fd-dev/fd-k8s-demo:latest
@@ -16,6 +15,4 @@ spec:
       stdin: true
       tty: true
   hostNetwork: true
-  hostPID: true
-  hostIPC: true
-  nodeName: metropolis-3d7de37302e89f6b4bf9a1ccad438d73
+  nodeName: metropolis-078e9c92e3a53a784fd8d0ddcf0f5a5e

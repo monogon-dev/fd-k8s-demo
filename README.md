@@ -31,12 +31,30 @@ kubectl label --overwrite ns $NS pod-security.kubernetes.io/enforce=privileged
 
 Deploy a demo cluster:
 
-    ./run.sh
+    ./up.sh
 
 List pods:
 
     kubectl get pods
 
-Once you're done, just delete the namespace to clean up all objects:
+Run monitor:
+
+    kubectl exec -it leader-0 -c validator -- fdctl monitor --config /etc/leader.toml
+
+Check gossip:
+
+    kubectl exec -it leader-0 -c validator -- solana -ul gossip
+
+Get a shell:
+
+    kubectl exec -it leader-0 -c validator bash
+
+Once you're done, simply delete the namespace to clean up all objects:
 
     kubectl delete namespace $NS
+
+## Limitations
+
+This demo is intended for ephemeral, short-lived test clusters.
+
+We directly create `Pod` objects, which is the same as if you directly deploy the workload to a machine using SSH. Nothing manages these pods - if the machine is hit by lightning, Kubernetes doesn't reschedule them elsewhere. If you want persistent, fault-tolerant nodes, you should use `ReplicaSet` objects or a higher-level controller, but then you'd also have to worry about managing the leader's state and to make sure all workloads tolerate being rescheduled (and probably rewrite `up.sh` in something that isn't a shell script).

@@ -1,0 +1,112 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: leader-config
+data:
+  leader.toml: |
+    user = "firedancer"
+    dynamic_port_range = "8100-8200"
+    scratch_directory = "/scratch/fd1"
+    
+    [layout]
+    affinity = "4-20"
+    solana_labs_affinity = "20-30"
+    verify_tile_count = 1
+    bank_tile_count = 1
+    quic_tile_count = 1
+    
+    [development.genesis]
+    hashes_per_tick = 12500
+    fund_initial_accounts = 9000
+    
+    [development.bench]
+    larger_max_cost_per_block = true
+    larger_shred_limits_per_block = true
+    
+    [rpc]
+    transaction_history = false
+    extended_tx_metadata_storage = false
+    
+    [tiles.net]
+    interface = "bond0"
+    xdp_mode = "skb"
+    
+    [snapshots]
+    incremental_snapshot_interval_slots = 50
+    full_snapshot_interval_slots = 100
+    
+    [tiles.quic]
+    max_concurrent_streams_per_connection = 3000
+    max_concurrent_connections = 256
+    max_concurrent_handshakes = 256
+    max_inflight_quic_packets = 2500
+    stream_pool_cnt = 2000000
+---
+# Point DNS record to leader-0's public IP.
+apiVersion: v1
+kind: Service
+metadata:
+  name: leader
+spec:
+  selector:
+    app: leader
+  clusterIP: None
+---
+# Leader container.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: leader-0
+  labels:
+    app: leader
+spec:
+  volumes:
+    - name: leader-config
+      configMap:
+        name: leader-config
+    - name: scratch
+      emptyDir: { }
+
+  containers:
+    # Main container running Frankendancer.
+    - image: europe-west3-docker.pkg.dev/monogon-infra/fd-dev/fd-k8s-demo:latest
+      imagePullPolicy: Always
+      name: validator
+      command:
+        - /usr/local/bin/leader-entrypoint.sh
+      securityContext:
+        # Firedancer needs more privileges than what we can
+        # provide using individual caps.
+        privileged: true
+      volumeMounts:
+        - mountPath: /etc/leader.toml
+          name: leader-config
+          subPath: leader.toml
+        - mountPath: /scratch
+          name: scratch
+
+    # Standalone webserver for serving leader data to followers.
+    - image: docker.io/caddy:2.8.4-alpine
+      name: webserver
+      command:
+        - /usr/bin/caddy
+        - file-server
+        - --browse
+        - --access-log
+        - --root
+        - /usr/share/caddy
+        - --listen
+        - :10801
+      ports:
+        - containerPort: 10801
+      volumeMounts:
+        - mountPath: /usr/share/caddy
+          name: scratch
+
+  # We need the host network namespace for AF_XDP.
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+  # Uncomment if you want to pin to a specific node for debugging.
+  nodeName: metropolis-078e9c92e3a53a784fd8d0ddcf0f5a5e  # TODO

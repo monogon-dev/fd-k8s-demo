@@ -1,0 +1,10 @@
+diff --git a/src/app/fdctl/configure/sysctl.c b/src/app/fdctl/configure/sysctl.c
+index d3e04974..531e5a34 100644
+--- a/src/app/fdctl/configure/sysctl.c
++++ b/src/app/fdctl/configure/sysctl.c
+@@ -56,5 +55,0 @@ static const sysctl_param_t params[] = {
+-  {
+-    "/proc/sys/kernel/numa_balancing",
+-    0,
+-    WARN_EXACT,
+-  }

@@ -74,3 +74,11 @@ It'll spend some time fetching the image, then you can enter the interactive she
 Attach to console:
 
     kubectl attach pods/node-debugger-0 -i -t
+
+Show nodes by region to pick a close one:
+
+    kubectl get node -o wide -L topology.kubernetes.io/region
+
+Reboot host from privileged node debug container:
+
+    echo b |sudo tee /proc/sysrq-trigger

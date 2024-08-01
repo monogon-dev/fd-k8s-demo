@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: follower-config
+data:
+  follower.toml: |
+    user = "firedancer"
+    dynamic_port_range = "8100-8200"
+    scratch_directory = "/scratch/fd1"
+    
+    [gossip]
+    entrypoints = [
+        "leader:8001"
+    ]
+    
+    [layout]
+    affinity = "10-20"
+    solana_labs_affinity = "20-30"
+    verify_tile_count = 1
+    bank_tile_count = 1
+    shred_tile_count = 1
+    
+    [rpc]
+    transaction_history = false
+    extended_tx_metadata_storage = false
+    
+    [consensus]
+    identity_path = "/scratch/id.json"
+    
+    [development.bench]
+    larger_max_cost_per_block = true
+    larger_shred_limits_per_block = true
+    rocksdb_disable_wal = true
+    
+    [tiles.net]
+    interface = "bond0"
+    xdp_mode = "skb"
+---
+# Follower container.
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: follower
+  labels:
+    app: follower
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: follower
+  template:
+    metadata:
+      labels:
+        app: follower
+    spec:
+      volumes:
+        - name: scratch
+          emptyDir: { }
+        - name: follower-config
+          configMap:
+            name: follower-config
+      containers:
+        - image: europe-west3-docker.pkg.dev/monogon-infra/fd-dev/fd-k8s-demo:latest
+          imagePullPolicy: Always
+          name: follower
+          command:
+            - /usr/local/bin/follower-entrypoint.sh
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /scratch
+              name: scratch
+            - mountPath: /etc/follower.toml
+              name: follower-config
+              subPath: follower.toml
+
+      # We need the host network namespace for AF_XDP.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
