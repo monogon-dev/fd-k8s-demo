@@ -9,7 +9,7 @@ fi
 
 # Copy over stuff from leader
 mkdir -p /scratch/cluster
-while ! curl -o /scratch/cluster/faucet.json http://leader:10801/fd1/faucet.json; do
+while ! curl --fail -o /scratch/cluster/faucet.json http://leader:10801/fd1/faucet.json; do
   echo "Failed to download faucet.json, retrying..."
   sleep 1
 done
@@ -20,7 +20,18 @@ if ! [[ -f /scratch/cluster/id.json ]]; then
   solana-keygen new --no-bip39-passphrase -o /scratch/cluster/id.json
 fi
 
-chown -R 1000:1000 /scratch/cluster
+mkdir -p /scratch/fd1/ledger
+if ! [[ -d /scratch/fd1/ledger/genesis.bin ]]; then
+  echo "Downloading genesis.bin..."
+  while ! curl --fail -o /scratch/fd1/ledger/genesis.tar.bz2 http://leader:10801/fd1/ledger/genesis.tar.bz2; do
+    echo "Failed to download genesis.tar.bz2, retrying..."
+    sleep 1
+  done
+  tar xjf /scratch/fd1/ledger/genesis.tar.bz2 -C /scratch/fd1/ledger
+fi
+
+chown -R 1000:1000 /scratch
+chmod 700 /scratch/fd1
 
 echo "Funding identity..."
 solana -u http://leader:8899 transfer -k /scratch/cluster/faucet.json \

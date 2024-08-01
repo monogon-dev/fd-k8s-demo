@@ -13,5 +13,10 @@ fi
 # Initialize Firedancer.
 fddev configure init all --config /etc/leader.toml
 
+(
+  cd /scratch/fd1/ledger
+  tar cjf genesis.tar.bz2 genesis.bin rocksdb/
+)
+
 # Run Firedancer.
 fddev --no-configure --config /etc/leader.toml

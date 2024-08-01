@@ -2,6 +2,8 @@
 
 This repository contains demonstration code for deploying a dev cluster running Firedancer's `main` branch on a Kubernetes cluster. It was tested on a Monogon OS cluster, but should also work with any other standards-compliant k8s clusters with privileged access to host namespaces.
 
+<img width="736" alt="image" src="https://github.com/user-attachments/assets/cce9a190-427a-4f9f-83ea-631c7347192f">
+
 ## Requirements
 
 - Access to a k8s cluster with `kubectl`.
@@ -57,6 +59,8 @@ Once you're done, simply delete the namespace to clean up all objects:
 ## Limitations
 
 This demo is intended for ephemeral, short-lived test clusters.
+
+Nodes are listening on public addresses and are reachable from the public internet.
 
 It runs in privileged mode in network namespace, eliminating almost all the resource isolation containers would otherwise afford us. It's up to the operator to avoid conflicts between workloads.
 
