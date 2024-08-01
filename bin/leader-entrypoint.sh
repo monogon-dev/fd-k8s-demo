@@ -7,6 +7,9 @@ if ! grep -Fq /sys/fs/bpf /proc/mounts; then
   mount -t bpf none /sys/fs/bpf
 fi
 
+# Workaround for https://github.com/firedancer-io/firedancer/issues/2575
+! ip addr add $(hostname -i)/32 dev lo
+
 # Initialize Firedancer.
 fddev configure init all --config /etc/leader.toml
 

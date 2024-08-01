@@ -25,8 +25,8 @@ RUN patch -p1 < gh-issue-2573.patch
 
 RUN FD_AUTO_INSTALL_PACKAGES=1 ./deps.sh check fetch install
 
-RUN MACHINE=linux_gcc_x86_64 make RUST_PROFILE=release -j fdctl fddev solana --output-sync=target; \
-    MACHINE=linux_gcc_x86_64 make RUST_PROFILE=release -j fdctl fddev solana --output-sync=target
+RUN MACHINE=linux_gcc_x86_64 make RUST_PROFILE=release -j fdctl fddev --output-sync=target
+RUN MACHINE=linux_gcc_x86_64 make RUST_PROFILE=release -j solana --output-sync=target
 
 # Build solana-keygen from unmodified repo
 RUN git clone -b v1.18.17 --depth=1 https://github.com/anza-xyz/agave solana-upstream && \

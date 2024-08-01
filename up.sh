@@ -4,8 +4,6 @@ set -euo pipefail
 IMAGE=${IMAGE:-"europe-west3-docker.pkg.dev/monogon-infra/fd-dev/fd-k8s-demo:latest"}
 NS=${NS:-"fd-dev-${USER}"}
 
-NUM_NODES=100
-
 # Build and push image
 docker build -t $IMAGE .
 docker push $IMAGE

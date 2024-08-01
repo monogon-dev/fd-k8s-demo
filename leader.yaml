@@ -52,6 +52,7 @@ metadata:
   name: leader-0
   labels:
     app: leader
+    xdp: exclusive
 spec:
   volumes:
     - name: leader-config
@@ -96,9 +97,21 @@ spec:
         - mountPath: /usr/share/caddy
           name: scratch
 
+  # Make sure there's only one AF_XDP pod per node.
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: xdp
+                operator: In
+                values:
+                  - exclusive
+          topologyKey: kubernetes.io/hostname
+
   # We need the host network namespace for AF_XDP.
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
 
   # Uncomment if you want to pin to a specific node for debugging.
-  nodeName: metropolis-078e9c92e3a53a784fd8d0ddcf0f5a5e  # TODO
+  #nodeName: metropolis-078e9c92e3a53a784fd8d0ddcf0f5a5e

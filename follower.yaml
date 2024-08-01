@@ -44,6 +44,8 @@ spec:
     metadata:
       labels:
         app: follower
+        xdp: exclusive
+
     spec:
       volumes:
         - name: scratch
@@ -65,6 +67,17 @@ spec:
             - mountPath: /etc/follower.toml
               name: follower-config
               subPath: follower.toml
+
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: xdp
+                    operator: In
+                    values:
+                      - exclusive
+              topologyKey: kubernetes.io/hostname
 
       # We need the host network namespace for AF_XDP.
       hostNetwork: true
